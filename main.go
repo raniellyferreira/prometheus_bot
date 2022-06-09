@@ -454,6 +454,9 @@ func main() {
 	}
 
 	router := gin.Default()
+	router.GET("/healthcheck", func(c *gin.Context) {
+		c.Data(http.StatusOK, "text/plain", []byte("HEALTH"))
+	})
 
 	router.GET("/ping/:chatid", GET_Handling)
 	router.POST("/alert/:chatid", POST_Handling)
