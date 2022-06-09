@@ -7,10 +7,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"path"
 	"sort"
 	"strconv"
@@ -21,10 +21,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/joho/godotenv"
 	"github.com/microcosm-cc/bluemonday"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
-
-	"gopkg.in/yaml.v2"
 )
 
 type Alerts struct {
@@ -49,14 +48,14 @@ type Alert struct {
 }
 
 type Config struct {
-	TelegramToken       string `yaml:"telegram_token"`
-	TemplatePath        string `yaml:"template_path"`
-	TimeZone            string `yaml:"time_zone"`
-	TimeOutFormat       string `yaml:"time_outdata"`
-	SplitChart          string `yaml:"split_token"`
-	SplitMessageBytes   int    `yaml:"split_msg_byte"`
-	SendOnly            bool   `yaml:"send_only"`
-	DisableNotification bool   `yaml:"disable_notification"`
+	TelegramToken       string
+	TemplatePath        string
+	TimeZone            string
+	TimeOutFormat       string
+	SplitChart          string
+	SplitMessageBytes   int
+	SendOnly            bool
+	DisableNotification bool
 }
 
 /**
@@ -88,6 +87,13 @@ const (
 	Y
 	Scale_Size_MAX
 )
+
+func GetEnv(key string, defaultVal string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultVal
+}
 
 func RoundPrec(x float64, prec int) float64 {
 	if math.IsNaN(x) || math.IsInf(x, 0) {
@@ -294,11 +300,13 @@ func HasKey(dict map[string]interface{}, key_search string) bool {
 	return false
 }
 
+func StringToInteger(s string) int {
+	v, _ := strconv.Atoi(s)
+	return v
+}
+
 // Global
-var config_path = flag.String("c", "config.yaml", "Path to a config file")
-var token_path = flag.String("token-from", "", "Path to a file containing telegram_token")
 var listen_addr = flag.String("l", ":9087", "Listen address")
-var template_path = flag.String("t", "", "Path to a template file")
 var debug = flag.Bool("d", false, "Debug template")
 
 var cfg = Config{}
@@ -388,30 +396,21 @@ func SplitString(s string, n int) []string {
 
 func main() {
 	flag.Parse()
+	_ = godotenv.Load()
 
-	content, err := ioutil.ReadFile(*config_path)
-	if err != nil {
-		log.Fatalf("Problem reading configuration file: %v", err)
-	}
-	err = yaml.Unmarshal(content, &cfg)
-	if err != nil {
-		log.Fatalf("Error parsing configuration file: %v", err)
-	}
-
-	if *template_path != "" {
-		cfg.TemplatePath = *template_path
-	}
-
-	if *token_path != "" {
-		content, err := ioutil.ReadFile(*token_path)
-		if err != nil {
-			log.Fatalf("Problem reading token file: %v", err)
-		}
-		cfg.TelegramToken = strings.TrimSpace(string(content))
+	cfg = Config{
+		TelegramToken:       GetEnv("TELEGRAM_TOKEN", ""),
+		TemplatePath:        GetEnv("TEMPLATE_PATH", "/template.tmpl"),
+		TimeZone:            GetEnv("TIME_ZONE", "America/Sao_Paulo"),
+		TimeOutFormat:       GetEnv("TIME_OUTDATA", "02/01/2006 15:04:05"),
+		SplitMessageBytes:   StringToInteger(GetEnv("SPLIT_MSG_BYTE", "4000")),
+		SendOnly:            GetEnv("SEND_ONLY", "true") == "true",
+		DisableNotification: GetEnv("DISABLE_NOTIFICATION", "false") == "true",
+		SplitChart:          GetEnv("SPLIT_TOKEN", "|"),
 	}
 
-	if cfg.SplitMessageBytes == 0 {
-		cfg.SplitMessageBytes = 4000
+	if *debug {
+		bot.Debug = true
 	}
 
 	if cfg.TemplatePath != "" {

@@ -1,13 +1,13 @@
-- [prometheus_bot](#prometheus-bot)
-  * [Compile](#compile)
-  * [Usage](#usage)
-    + [Configuring alert manager](#configuring-alert-manager)
-  * [Test](#test)
-    + [Create your own test](#create-your-own-test)
-  * [Customising messages with template](#customising-messages-with-template)
-    + [Template extra functions](#template-extra-functions)
+- [prometheus_bot](#prometheus_bot)
+  - [Compile](#compile)
+  - [Usage](#usage)
+    - [Configuring alert manager](#configuring-alert-manager)
+  - [Test](#test)
+    - [Create your own test](#create-your-own-test)
+  - [Customising messages with template](#customising-messages-with-template)
+    - [Template extra functions](#template-extra-functions)
       - [Support this functions list](#support-this-functions-list)
-  * [Production example](#production-example)
+  - [Production example](#production-example)
 
 # prometheus_bot
 
@@ -26,20 +26,20 @@ make
 
 1. Create Telegram bot with [BotFather](https://t.me/BotFather), it will return your bot token
 
-2. Specify telegram token in ```config.yaml```:
+2. Specify telegram token in ```.env```:
 
-    ```yml
-    telegram_token: "token goes here"
+    ```Text
+    TELEGRAM_TOKEN="token goes here"
     # ONLY IF YOU USING DATA FORMATTING FUNCTION, NOTE for developer: important or test fail
-    time_outdata: "02/01/2006 15:04:05" 
-    template_path: "template.tmpl" # ONLY IF YOU USING TEMPLATE
-    time_zone: "Europe/Rome" # ONLY IF YOU USING TEMPLATE
-    split_msg_byte: 4000
-    send_only: true # use bot only to send messages.
+    TIME_OUTDATA="02/01/2006 15:04:05"
+    TEMPLATE_PATH=/template.tmpl
+    TIME_ZONE=America/Sao_Paulo
+    SPLIT_MSG_BYTE="4000"
+    SEND_ONLY="true"
     ```
 
 3. Run ```telegram_bot```. See ```prometheus_bot --help``` for command line options
-3. Get chat ID with one of two ways
+4. Get chat ID with one of two ways
     1. Start conversation, send message to bot mentioning it
     2. Add your bot to a group. It should report group id now. To get ID of a group if bot is already a member [send a message that starts with `/`](https://core.telegram.org/bots#privacy-mode)
 
@@ -87,14 +87,13 @@ TELEGRAM_CHATID="YOUR TELEGRAM CHAT ID" make test
 This bot support [go templating language](https://golang.org/pkg/text/template/).
 Use it for customising your message.
 
-To enable template set these settings in your ```config.yaml``` or template will be skipped.
+To enable template set these settings in your ```.env``` or template will be skipped.
 
-```yml
-telegram_token: "token here"
-template_path: "template.tmpl" # your template file name
-time_zone: "Europe/Rome" # your time zone check it out from WIKI
-split_token: "|" # token used for split measure label.
-disable_notification: true  # disable notification for messages.
+```Text
+TEMPLATE_PATH=/path/to/template
+TIME_ZONE=America/Sao_Paulo # your time zone check it out from WIKI
+SPLIT_TOKEN: "|" # token used for split measure label.
+DISABLE_NOTIFICATION="true" # disable notification for messages.
 ```
 
 You can also pass template path with `-t` command line argument, it has higher priority than the config option.
