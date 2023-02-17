@@ -8,7 +8,6 @@ on:
 
 env:
   IMAGE_REPOSITORY: gru.ocir.io/grwidfxfmi4f/prometheus-bot
-  ARCH: amd64
 
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -41,6 +40,7 @@ jobs:
           push: true
           context: .
           file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
           tags: |
             ${{env.IMAGE_REPOSITORY}}:latest
             ${{env.IMAGE_REPOSITORY}}:build${{ github.run_number }}

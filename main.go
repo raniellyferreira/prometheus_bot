@@ -667,7 +667,7 @@ func POST_Handling(c *gin.Context) {
 				"message": sendmsg,
 				"srcmsg":  fmt.Sprint(msgtext),
 			})
-			msg := tgbotapi.NewMessage(chatid, "Error sending message, checkout logs")
+			msg := tgbotapi.NewMessage(chatid, "Error on sending message: "+fmt.Sprint(err))
 			if cfg.DisableNotification {
 				msg.DisableNotification = true
 			}
